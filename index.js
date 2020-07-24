@@ -32,7 +32,7 @@ function Cache () {
 
     if (!isNaN(record.expire)) {
       record.timeout = setTimeout(function() {
-        _del(key);
+        this._del(key);
         if (timeoutCallback) {
           timeoutCallback(key, value);
         }
@@ -58,13 +58,13 @@ function Cache () {
     }
 
     if (canDelete) {
-      _del(key);
+      this._del(key);
     }
 
     return canDelete;
   };
 
-  function _del(key){
+  this._del = function (key){
     _size--;
     delete this._cache[key];
   }
@@ -128,29 +128,26 @@ function Cache () {
     return Object.keys(this._cache);
   };
 
-  // this.stats = function() {
-  //   var plainJsCache = {};
-
-  //   // Discard the `timeout` property.
-  //   // Note: JSON doesn't support `NaN`, so convert it to `'NaN'`.
-  //   var totalBytes = 0;
-  //   var currBytes, record;
-  //   for (var key in this._cache) {
-  //     record = this._cache[key];
-  //     currBytes = record.value.length * 2;
-  //     totalBytes += currBytes;
-  //     plainJsCache[key] = {
-  //       bytes: currBytes,
-  //       expire: new Date(record.expire).toString() || 'NaN',
-  //     };
-  //   }
-  //   plainJsCache = {
-  //     totalBytes: totalBytes,
-  //     cacheIndex: plainJsCache
-  //   };
-
-  //   return JSON.stringify(plainJsCache);
-  // };
+  this.stats = function() {
+    // Note: JSON doesn't support `NaN`, so convert it to `'NaN'`.
+    var plainJsCache = {};
+    var totalBytes = 0;
+    var bytes, record;
+    for (var key in this._cache) {
+      record = this._cache[key];
+      bytes = record.value.length * 2;
+      totalBytes += bytes;
+      plainJsCache[key] = {
+        bytes: bytes,
+        expire: (record.expire) ? new Date(record.expire).toString() : 'NaN',
+      };
+    }
+    plainJsCache = {
+      totalBytes: totalBytes,
+      cacheIndex: plainJsCache
+    };
+    return JSON.stringify(plainJsCache);
+  };
 
   this.exportJson = function() {
     var plainJsCache = {};
