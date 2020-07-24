@@ -136,9 +136,13 @@ function Cache () {
     for (var key in _cache) {
       var record = _cache[key];
       plainJsCache[key] = {
-        value: record.value.length,
+        bytes: record.value.length,
         expire: new Date(record.expire).toString() || 'NaN',
       };
+    }
+    plainJsCache = {
+      totalBytes: 10,
+      cache_index: plainJsCache
     }
 
     return JSON.stringify(plainJsCache);
