@@ -137,7 +137,7 @@ function Cache () {
       var record = _cache[key];
       plainJsCache[key] = {
         value: record.value.length,
-        expire: record.expire || 'NaN',
+        expire: new Date(record.expire).toString() || 'NaN',
       };
     }
 
