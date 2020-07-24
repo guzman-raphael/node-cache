@@ -1,11 +1,11 @@
 'use strict';
 
 function Cache () {
-  var _cache = Object.create(null);
   var _hitCount = 0;
   var _missCount = 0;
   var _size = 0;
   var _debug = false;
+  this._cache = Object.create(null);
 
   this.put = function(key, value, time, timeoutCallback) {
     if (_debug) {
@@ -18,7 +18,7 @@ function Cache () {
       throw new Error('Cache timeout callback must be a function');
     }
 
-    var oldRecord = _cache[key];
+    var oldRecord = this._cache[key];
     if (oldRecord) {
       clearTimeout(oldRecord.timeout);
     } else {
@@ -39,7 +39,7 @@ function Cache () {
       }.bind(this), time);
     }
 
-    _cache[key] = record;
+    this._cache[key] = record;
 
     return value;
   };
@@ -47,7 +47,7 @@ function Cache () {
   this.del = function(key) {
     var canDelete = true;
 
-    var oldRecord = _cache[key];
+    var oldRecord = this._cache[key];
     if (oldRecord) {
       clearTimeout(oldRecord.timeout);
       if (!isNaN(oldRecord.expire) && oldRecord.expire < Date.now()) {
@@ -66,15 +66,15 @@ function Cache () {
 
   function _del(key){
     _size--;
-    delete _cache[key];
+    delete this._cache[key];
   }
 
   this.clear = function() {
-    for (var key in _cache) {
-      clearTimeout(_cache[key].timeout);
+    for (var key in this._cache) {
+      clearTimeout(this._cache[key].timeout);
     }
     _size = 0;
-    _cache = Object.create(null);
+    this._cache = Object.create(null);
     if (_debug) {
       _hitCount = 0;
       _missCount = 0;
@@ -82,7 +82,7 @@ function Cache () {
   };
 
   this.get = function(key) {
-    var data = _cache[key];
+    var data = this._cache[key];
     if (typeof data != "undefined") {
       if (isNaN(data.expire) || data.expire >= Date.now()) {
         if (_debug) _hitCount++;
@@ -91,7 +91,7 @@ function Cache () {
         // free some space
         if (_debug) _missCount++;
         _size--;
-        delete _cache[key];
+        delete this._cache[key];
       }
     } else if (_debug) {
       _missCount++;
@@ -106,7 +106,7 @@ function Cache () {
   this.memsize = function() {
     var size = 0,
       key;
-    for (key in _cache) {
+    for (key in this._cache) {
       size++;
     }
     return size;
@@ -125,40 +125,40 @@ function Cache () {
   };
 
   this.keys = function() {
-    return Object.keys(_cache);
+    return Object.keys(this._cache);
   };
 
-  this.stats = function() {
-    var plainJsCache = {};
+  // this.stats = function() {
+  //   var plainJsCache = {};
 
-    // Discard the `timeout` property.
-    // Note: JSON doesn't support `NaN`, so convert it to `'NaN'`.
-    var totalBytes = 0;
-    var currBytes, record;
-    for (var key in _cache) {
-      record = _cache[key];
-      currBytes = record.value.length * 2;
-      totalBytes += currBytes;
-      plainJsCache[key] = {
-        bytes: currBytes,
-        expire: new Date(record.expire).toString() || 'NaN',
-      };
-    }
-    plainJsCache = {
-      totalBytes: totalBytes,
-      cacheIndex: plainJsCache
-    };
+  //   // Discard the `timeout` property.
+  //   // Note: JSON doesn't support `NaN`, so convert it to `'NaN'`.
+  //   var totalBytes = 0;
+  //   var currBytes, record;
+  //   for (var key in this._cache) {
+  //     record = this._cache[key];
+  //     currBytes = record.value.length * 2;
+  //     totalBytes += currBytes;
+  //     plainJsCache[key] = {
+  //       bytes: currBytes,
+  //       expire: new Date(record.expire).toString() || 'NaN',
+  //     };
+  //   }
+  //   plainJsCache = {
+  //     totalBytes: totalBytes,
+  //     cacheIndex: plainJsCache
+  //   };
 
-    return JSON.stringify(plainJsCache);
-  };
+  //   return JSON.stringify(plainJsCache);
+  // };
 
   this.exportJson = function() {
     var plainJsCache = {};
 
     // Discard the `timeout` property.
     // Note: JSON doesn't support `NaN`, so convert it to `'NaN'`.
-    for (var key in _cache) {
-      var record = _cache[key];
+    for (var key in this._cache) {
+      var record = this._cache[key];
       plainJsCache[key] = {
         value: record.value,
         expire: record.expire || 'NaN',
@@ -177,7 +177,7 @@ function Cache () {
     for (var key in cacheToImport) {
       if (cacheToImport.hasOwnProperty(key)) {
         if (skipDuplicates) {
-          var existingRecord = _cache[key];
+          var existingRecord = this._cache[key];
           if (existingRecord) {
             if (_debug) {
               console.log('Skipping duplicate imported key \'%s\'', key);
