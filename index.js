@@ -128,6 +128,22 @@ function Cache () {
     return Object.keys(_cache);
   };
 
+  this.stats = function() {
+    var plainJsCache = {};
+
+    // Discard the `timeout` property.
+    // Note: JSON doesn't support `NaN`, so convert it to `'NaN'`.
+    for (var key in _cache) {
+      var record = _cache[key];
+      plainJsCache[key] = {
+        value: record.value.length,
+        expire: record.expire || 'NaN',
+      };
+    }
+
+    return JSON.stringify(plainJsCache);
+  };
+
   this.exportJson = function() {
     var plainJsCache = {};
 
