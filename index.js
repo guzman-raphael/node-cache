@@ -133,10 +133,10 @@ function Cache () {
 
     // Discard the `timeout` property.
     // Note: JSON doesn't support `NaN`, so convert it to `'NaN'`.
-    totalBytes = 0;
+    var totalBytes = 0;
     for (var key in _cache) {
       var record = _cache[key];
-      currBytes = record.value.length;
+      currBytes = record.value.length * 2;
       totalBytes += currBytes;
       plainJsCache[key] = {
         bytes: currBytes,
